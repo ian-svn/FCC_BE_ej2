@@ -1,51 +1,73 @@
-// index.js
-// where your node app starts
-
-// init project
 require('dotenv').config();
 var express = require('express');
 var app = express();
-
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC
 var cors = require('cors');
-app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
+var dns = require('dns');
+var bodyParser = require('body-parser');
 
-// http://expressjs.com/en/starter/static-files.html
+app.use(cors({ optionsSuccessStatus: 200 }));
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(express.static('public'));
 
-// http://expressjs.com/en/starter/basic-routing.html
+let urlDatabase = [];
+let urlCounter = 1;
+
+function isValidUrl(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-// your first API endpoint...
-app.get('/api/hello', function (req, res) {
-  res.json({ greeting: 'hello API' });
-});
+app.post('/api/shorturl', function (req, res) {
+  const originalUrl = req.body.url;
+  
+  if (!isValidUrl(originalUrl)) {
+    return res.json({ error: 'invalid url' });
+  }
 
-// Header Parser endpoint
-app.get('/api/whoami', function (req, res) {
-  // Obtener la IP real, considerando el proxy si existe
-  const ipaddress = req.headers['x-forwarded-for'] || 
-                   req.connection.remoteAddress || 
-                   req.socket.remoteAddress;
+  const existingUrl = urlDatabase.find(entry => entry.original_url === originalUrl);
+  if (existingUrl) {
+    return res.json({
+      original_url: existingUrl.original_url,
+      short_url: existingUrl.short_url
+    });
+  }
+
+  const newUrl = {
+    original_url: originalUrl,
+    short_url: urlCounter
+  };
   
-  // Obtener el idioma preferido
-  const language = req.headers['accept-language'];
-  
-  // Obtener el user-agent
-  const software = req.headers['user-agent'];
-  
-  // Devolver el objeto JSON con las claves requeridas
+  urlDatabase.push(newUrl);
+  urlCounter++;
+
   res.json({
-    ipaddress: ipaddress,
-    language: language,
-    software: software
+    original_url: newUrl.original_url,
+    short_url: newUrl.short_url
   });
 });
 
-// listen for requests :)
+app.get('/api/shorturl/:shorturl', function (req, res) {
+  const shortUrl = parseInt(req.params.shorturl);
+  const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
+  
+  if (urlEntry) {
+    res.redirect(urlEntry.original_url);
+  } else {
+    res.json({ error: 'invalid url' });
+  }
+});
+
 var listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+

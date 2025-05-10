@@ -12,7 +12,7 @@
    <body>
       <div class="container">
         <h1>Request Header Parser Microservice</h1>
-
+        
         <h2>Example Usage:</h2>
         <p>
           <a href="api/whoami">[base url]/api/whoami</a>
@@ -20,12 +20,7 @@
 
         <h2>Example Output:</h2>
         <p>
-          <code>{"ipaddress":"::1","language":"es-ES,es;q=0.9","software":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}</code>
-        </p>
-      </div>
-      <h2>Output:</h2>
-        <p>
-          <code id="apiOutput">Cargando...</code>
+          <code>{"ipaddress":"::ffff:159.20.14.100","language":"en-US,en;q=0.5","software":"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0"}</code>
         </p>
       </div>
       <div class="footer">
@@ -33,23 +28,6 @@
           by <a href="https://www.freecodecamp.org">Ian Vila</a>
         </p>
       </div>
-
-      <script>
-        // Función para obtener y mostrar los datos de la API
-        async function getWhoamiData() {
-          try {
-            const response = await fetch('/api/whoami');
-            const data = await response.json();
-            document.getElementById('apiOutput').textContent = JSON.stringify(data, null, 2);
-          } catch (error) {
-            document.getElementById('apiOutput').textContent = 'Error al cargar los datos';
-          }
-        }
-
-        // Cargar los datos cuando la página se inicie
-        getWhoamiData();
-      </script>
    </body>
-
 
 </html>
